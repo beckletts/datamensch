@@ -23,7 +23,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             startMonth: null,
             endMonth: null
         },
-        categories: []
+        categories: [],
+        country: 'all',
+        eLearningCourse: null
     });
 
     // Extract all webinar data regardless of date
@@ -39,7 +41,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     // Filter the data based on selected filters
     const filteredData = useMemo(() => {
         return data.filter(record => {
-            // Filter by time frame - but skip this filter for webinar courses
+            // Filter by time frame
             if (filters.timeFrame.startMonth) {
                 const recordDate = new Date(record.enrollmentDate);
                 const monthYear = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
@@ -66,6 +68,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                 
                 if (!filters.categories.includes(recordCategory)) {
                     return false;
+                }
+            }
+            
+            // Filter by country
+            if (filters.country !== 'all') {
+                const isUK = record.centreCountry.toLowerCase() === 'uk' || 
+                            record.centreCountry.toLowerCase() === 'united kingdom';
+                
+                if (filters.country === 'uk' && !isUK) {
+                    return false;
+                }
+                
+                if (filters.country === 'international' && isUK) {
+                    return false;
+                }
+            }
+            
+            // Filter by eLearning course
+            if (filters.eLearningCourse) {
+                // Only apply if it's an eLearning course (not a webinar or recording)
+                if (!record.course.toLowerCase().includes('webinar') && 
+                    !record.course.toLowerCase().includes('recording')) {
+                    if (record.course !== filters.eLearningCourse) {
+                        return false;
+                    }
                 }
             }
             

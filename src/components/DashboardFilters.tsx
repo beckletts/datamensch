@@ -21,6 +21,8 @@ export interface FilterOptions {
     endMonth: string | null;
   };
   categories: string[];
+  country: 'all' | 'uk' | 'international';
+  eLearningCourse: string | null;
 }
 
 interface DashboardFiltersProps {
@@ -81,6 +83,21 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     return Array.from(categories);
   }, [data]);
 
+  // Extract eLearning courses
+  const eLearningCourses = React.useMemo(() => {
+    const courses = new Set<string>();
+    
+    data.forEach(record => {
+      // Only include eLearning courses (not webinars or recordings)
+      if (!record.course.toLowerCase().includes('webinar') && 
+          !record.course.toLowerCase().includes('recording')) {
+        courses.add(record.course);
+      }
+    });
+    
+    return Array.from(courses).sort();
+  }, [data]);
+
   const handleTimeFrameChange = (event: SelectChangeEvent, type: 'startMonth' | 'endMonth') => {
     const value = event.target.value === 'all' ? null : event.target.value;
     onFilterChange({
@@ -100,6 +117,21 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     });
   };
 
+  const handleCountryChange = (event: SelectChangeEvent) => {
+    onFilterChange({
+      ...filters,
+      country: event.target.value as 'all' | 'uk' | 'international'
+    });
+  };
+
+  const handleELearningCourseChange = (event: SelectChangeEvent) => {
+    const value = event.target.value === 'all' ? null : event.target.value;
+    onFilterChange({
+      ...filters,
+      eLearningCourse: value
+    });
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
       <Typography variant="h6" gutterBottom>
@@ -107,7 +139,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
       </Typography>
       
       <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6} lg={3}>
           <FormControl fullWidth>
             <InputLabel>From Month</InputLabel>
             <Select
@@ -125,7 +157,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
           </FormControl>
         </Grid>
         
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6} lg={3}>
           <FormControl fullWidth>
             <InputLabel>To Month</InputLabel>
             <Select
@@ -150,7 +182,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
           </FormControl>
         </Grid>
         
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6} lg={3}>
           <FormControl fullWidth>
             <InputLabel>Training Categories</InputLabel>
             <Select
@@ -178,9 +210,44 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
             </Select>
           </FormControl>
         </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <FormControl fullWidth>
+            <InputLabel>Location</InputLabel>
+            <Select
+              value={filters.country}
+              label="Location"
+              onChange={handleCountryChange}
+            >
+              <MenuItem value="all">All Locations</MenuItem>
+              <MenuItem value="uk">UK Only</MenuItem>
+              <MenuItem value="international">International Only</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel>eLearning Course</InputLabel>
+            <Select
+              value={filters.eLearningCourse || 'all'}
+              label="eLearning Course"
+              onChange={handleELearningCourseChange}
+              disabled={filters.categories.length > 0 && !filters.categories.includes('eLearning')}
+            >
+              <MenuItem value="all">All eLearning Courses</MenuItem>
+              {eLearningCourses.map((course) => (
+                <MenuItem key={course} value={course}>
+                  {course}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
       </Grid>
       
-      {(filters.timeFrame.startMonth || filters.categories.length > 0) && (
+      {(filters.timeFrame.startMonth || filters.categories.length > 0 || 
+        filters.country !== 'all' || filters.eLearningCourse) && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body2" color="text.secondary" component="div">
             Active filters: 
@@ -198,6 +265,20 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
             {filters.categories.map(cat => (
               <Chip key={cat} label={`Category: ${cat}`} size="small" sx={{ ml: 1 }} />
             ))}
+            {filters.country !== 'all' && (
+              <Chip 
+                label={`Location: ${filters.country === 'uk' ? 'UK Only' : 'International Only'}`} 
+                size="small" 
+                sx={{ ml: 1 }} 
+              />
+            )}
+            {filters.eLearningCourse && (
+              <Chip 
+                label={`eLearning: ${filters.eLearningCourse}`} 
+                size="small" 
+                sx={{ ml: 1 }} 
+              />
+            )}
           </Typography>
         </Box>
       )}
