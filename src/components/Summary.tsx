@@ -42,10 +42,8 @@ export const Summary: React.FC<SummaryProps> = ({
 
     // Calculate the four key metrics
     const metrics = useMemo(() => {
-        // 1. Total webinar registrations
-        const webinarRegistrations = data.filter(record => 
-            record.course.toLowerCase().includes('webinar')
-        ).length;
+        // 1. Total webinar registrations (using allWebinarData to show all enrollments regardless of time frame)
+        const webinarRegistrations = allWebinarData.length;
         
         // 2. Total recording viewings
         const recordingViewings = data.filter(record =>
@@ -68,7 +66,7 @@ export const Summary: React.FC<SummaryProps> = ({
             completedELearning,
             storylaneViews
         };
-    }, [data, storylaneData]);
+    }, [data, storylaneData, allWebinarData]);
 
     return (
         <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -80,7 +78,7 @@ export const Summary: React.FC<SummaryProps> = ({
             <Grid item xs={12} md={3}>
                 <Paper sx={{ p: 2 }}>
                     <Typography variant="subtitle2" color="textSecondary">
-                        Webinar Enrollments
+                        Webinar Enrollments (All)
                     </Typography>
                     <Typography variant="h4">
                         {metrics.webinarRegistrations}
