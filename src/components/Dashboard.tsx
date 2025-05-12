@@ -11,6 +11,7 @@ import { DashboardFilters, FilterOptions } from './DashboardFilters';
 import { CategoryDetail } from './CategoryDetail';
 import { getWebinarEnrollmentStats } from '../utils/dataProcessor';
 import { WebinarEnrollmentTable } from './WebinarEnrollmentTable';
+import { CollapsibleSection } from './CollapsibleSection';
 
 interface DashboardProps {
     data: TrainingRecord[];
@@ -118,34 +119,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                 Training Analytics Dashboard
             </Typography>
             
-            <DashboardFilters 
-                data={data} 
-                filters={filters} 
-                onFilterChange={handleFilterChange} 
-            />
+            <CollapsibleSection title="Filters" defaultExpanded={true}>
+                <DashboardFilters 
+                    data={data} 
+                    filters={filters} 
+                    onFilterChange={handleFilterChange} 
+                />
+            </CollapsibleSection>
             
             {filteredData.length > 0 ? (
                 <>
-                    <Summary 
-                        data={filteredData} 
-                        allWebinarData={allWebinarData}
-                    />
+                    <CollapsibleSection title="Key Statistics" defaultExpanded={true}>
+                        <Summary 
+                            data={filteredData} 
+                            allWebinarData={allWebinarData}
+                        />
+                    </CollapsibleSection>
                     
                     {showWebinarTable && (
-                        <Box sx={{ mt: 4, mb: 4 }}>
-                            <Typography variant="h5" gutterBottom>
-                                Webinar Enrollment Counts
-                            </Typography>
-                            <Paper sx={{ p: 2 }}>
-                                <WebinarEnrollmentTable webinarStats={webinarStats} />
-                            </Paper>
-                        </Box>
+                        <CollapsibleSection title="Webinar Enrollment Counts" defaultExpanded={true}>
+                            <WebinarEnrollmentTable webinarStats={webinarStats} />
+                        </CollapsibleSection>
                     )}
                     
-                    <Box sx={{ mt: 4 }}>
-                        <Typography variant="h5" gutterBottom>
-                            Key Metrics
-                        </Typography>
+                    <CollapsibleSection title="Key Metrics" defaultExpanded={true}>
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={4}>
                                 <Paper sx={{ p: 2 }}>
@@ -163,23 +160,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                                 </Paper>
                             </Grid>
                         </Grid>
-                    </Box>
+                    </CollapsibleSection>
                     
                     {showCategoryDetail && (
-                        <>
-                            <Divider sx={{ my: 4 }} />
+                        <CollapsibleSection title={`${filters.categories[0]} Details`} defaultExpanded={true}>
                             <CategoryDetail 
                                 data={filteredData}
                                 allWebinarData={allWebinarData} 
                                 category={filters.categories[0]} 
                             />
-                        </>
+                        </CollapsibleSection>
                     )}
                     
-                    <Divider sx={{ my: 4 }} />
-                    
-                    {/* Monthly breakdown will only render if there's multi-month data */}
-                    <MonthlyBreakdown data={filteredData} />
+                    <CollapsibleSection title="Monthly Breakdown" defaultExpanded={false}>
+                        <MonthlyBreakdown data={filteredData} />
+                    </CollapsibleSection>
                 </>
             ) : (
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
