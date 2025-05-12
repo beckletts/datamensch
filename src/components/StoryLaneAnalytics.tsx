@@ -72,6 +72,7 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
     const [selectedDemo, setSelectedDemo] = useState<string>('all');
     const [selectedMonth, setSelectedMonth] = useState<string>('all');
     const [selectedLocation, setSelectedLocation] = useState<string>('all');
+    const [selectedQualificationType, setSelectedQualificationType] = useState<string>('all');
     
     // Handle filter changes
     const handleDemoChange = (event: SelectChangeEvent<string>) => {
@@ -84,6 +85,10 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
     
     const handleLocationChange = (event: SelectChangeEvent<string>) => {
         setSelectedLocation(event.target.value);
+    };
+    
+    const handleQualificationTypeChange = (event: SelectChangeEvent<string>) => {
+        setSelectedQualificationType(event.target.value);
     };
     
     // Filter the data based on selected filters
@@ -127,9 +132,26 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
                 }
             }
             
+            // Filter by qualification type (VQ/GQ)
+            if (selectedQualificationType !== 'all') {
+                const demoLower = record.demo.toLowerCase();
+                const isVQ = demoLower.includes('pop') || 
+                          demoLower.includes('btec') || 
+                          demoLower.includes('cohort') || 
+                          demoLower.includes('vq');
+                
+                if (selectedQualificationType === 'vq' && !isVQ) {
+                    return false;
+                }
+                
+                if (selectedQualificationType === 'gq' && isVQ) {
+                    return false;
+                }
+            }
+            
             return true;
         });
-    }, [data, selectedDemo, selectedMonth, selectedLocation]);
+    }, [data, selectedDemo, selectedMonth, selectedLocation, selectedQualificationType]);
     
     // Calculate statistics based on filtered data
     const stats = useMemo(() => {
@@ -255,6 +277,20 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
                             <MenuItem value="all">All Locations</MenuItem>
                             <MenuItem value="uk">UK Only</MenuItem>
                             <MenuItem value="international">International Only</MenuItem>
+                        </Select>
+                    </FormControl>
+                    
+                    <FormControl sx={{ minWidth: 200 }}>
+                        <InputLabel id="qualification-select-label">Qualification Type</InputLabel>
+                        <Select
+                            labelId="qualification-select-label"
+                            value={selectedQualificationType}
+                            label="Qualification Type"
+                            onChange={handleQualificationTypeChange}
+                        >
+                            <MenuItem value="all">All Qualifications</MenuItem>
+                            <MenuItem value="vq">Vocational (VQ)</MenuItem>
+                            <MenuItem value="gq">General (GQ)</MenuItem>
                         </Select>
                     </FormControl>
                 </Stack>
