@@ -1,6 +1,66 @@
 # Training Report Builder
 
-A visualization tool for training data analytics. Upload CSV data and view analytics on completion rates, geographic distribution, and engagement metrics.
+A React-based dashboard application for analyzing training enrollment data, with a specific focus on tracking webinar enrollments. The application visualizes training statistics and allows filtering by date ranges and course categories while maintaining accurate webinar enrollment counts.
+
+## Key Features
+
+- **Webinar Enrollment Tracking**: Counts all enrollments for each webinar regardless of enrollment date
+- **Interactive Filtering**: Filter data by date range and training category without losing sight of total webinar counts
+- **Comprehensive Analytics**: View completion rates, geographic distribution, and engagement metrics
+- **Searchable Webinar Table**: Easily find specific webinars and their enrollment counts
+- **CSV Data Import**: Upload and analyze your own training data
+
+## Technologies Used
+
+- React + TypeScript
+- Material UI for components
+- Chart.js for data visualization
+- Papa Parse for CSV parsing
+
+## Setup and Installation
+
+1. Clone the repository:
+```
+git clone https://github.com/beckletts/datamensch.git
+cd datamensch
+```
+
+2. Install dependencies:
+```
+npm install
+```
+
+3. Run the development server:
+```
+npm run dev
+```
+
+4. Open your browser and navigate to: `http://localhost:5174/`
+
+## Usage
+
+1. Upload your CSV training data using the file upload component
+2. Use the dashboard filters to select specific date ranges or training categories
+3. View the webinar enrollment counts and other key statistics
+4. Analyze detailed metrics in the charts and tables
+
+## Data Format
+
+The application expects CSV data with the following columns:
+- Course
+- Enrollment Date (UTC TimeZone)
+- Started Date (UTC TimeZone)
+- Completion Date (UTC TimeZone)
+- Status
+- Progress %
+- Time Spent(minutes)
+- Quiz Score
+- Centre Number
+- Centre Country
+
+## License
+
+MIT License
 
 ## Development
 
