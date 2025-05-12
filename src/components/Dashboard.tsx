@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Grid, Paper, Typography, Box, Divider } from '@mui/material';
+import { Grid, Paper, Typography, Box } from '@mui/material';
 import { TrainingRecord } from '../types/TrainingData';
 import { Summary } from './Summary';
 import { CompletionRateChart } from './charts/CompletionRateChart';
