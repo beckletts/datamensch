@@ -12,12 +12,15 @@ import { CategoryDetail } from './CategoryDetail';
 import { getWebinarEnrollmentStats } from '../utils/dataProcessor';
 import { WebinarEnrollmentTable } from './WebinarEnrollmentTable';
 import { CollapsibleSection } from './CollapsibleSection';
+import { StoryLaneRecord } from '../types/StoryLaneData';
+import { StoryLaneAnalytics } from './StoryLaneAnalytics';
 
 interface DashboardProps {
     data: TrainingRecord[];
+    storylaneData?: StoryLaneRecord[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }) => {
     // Default filters
     const [filters, setFilters] = useState<FilterOptions>({
         timeFrame: {
@@ -113,6 +116,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     const showWebinarTable = filters.categories.length === 0 || 
         (filters.categories.length === 1 && filters.categories[0] === 'Webinar');
     
+    // Determine if we should show StoryLane data
+    const hasStoryLaneData = storylaneData && storylaneData.length > 0;
+    
     return (
         <Box>
             <Typography variant="h4" gutterBottom sx={{ mt: 4, mb: 4 }}>
@@ -141,6 +147,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                             <WebinarEnrollmentTable webinarStats={webinarStats} />
                         </CollapsibleSection>
                     )}
+                    
+                    <CollapsibleSection title="Storylane Analytics" defaultExpanded={true}>
+                        <Paper sx={{ p: 3 }}>
+                            {hasStoryLaneData ? (
+                                <>
+                                    <Typography variant="h6" gutterBottom>
+                                        StoryLane Analytics
+                                    </Typography>
+                                    <Box sx={{ mt: 2 }}>
+                                        <StoryLaneAnalytics data={storylaneData} />
+                                    </Box>
+                                </>
+                            ) : (
+                                <>
+                                    <Typography variant="h6" gutterBottom>
+                                        StoryLane Data Not Available
+                                    </Typography>
+                                    <Typography variant="body1" paragraph>
+                                        To enable StoryLane analytics, please add a "Storylane all.csv" file to the public folder of your application.
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        The file should contain the StoryLane training data with the following columns:
+                                        demo, link, lastView, totalTime, stepsCompleted, percentComplete, openedCTA, country
+                                    </Typography>
+                                </>
+                            )}
+                        </Paper>
+                    </CollapsibleSection>
                     
                     <CollapsibleSection title="Key Metrics" defaultExpanded={true}>
                         <Grid container spacing={3}>
