@@ -23,6 +23,7 @@ export interface FilterOptions {
   categories: string[];
   country: 'all' | 'uk' | 'international';
   eLearningCourse: string | null;
+  qualificationType: 'all' | 'vq' | 'gq';
 }
 
 interface DashboardFiltersProps {
@@ -121,6 +122,13 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     onFilterChange({
       ...filters,
       country: event.target.value as 'all' | 'uk' | 'international'
+    });
+  };
+
+  const handleQualificationTypeChange = (event: SelectChangeEvent) => {
+    onFilterChange({
+      ...filters,
+      qualificationType: event.target.value as 'all' | 'vq' | 'gq'
     });
   };
 
@@ -226,7 +234,22 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
           </FormControl>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6} lg={3}>
+          <FormControl fullWidth>
+            <InputLabel>Qualification Type</InputLabel>
+            <Select
+              value={filters.qualificationType}
+              label="Qualification Type"
+              onChange={handleQualificationTypeChange}
+            >
+              <MenuItem value="all">All Qualifications</MenuItem>
+              <MenuItem value="vq">Vocational (VQ)</MenuItem>
+              <MenuItem value="gq">General (GQ)</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={6}>
           <FormControl fullWidth>
             <InputLabel>eLearning Course</InputLabel>
             <Select

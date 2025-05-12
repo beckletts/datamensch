@@ -29,7 +29,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }
         },
         categories: [],
         country: 'all',
-        eLearningCourse: null
+        eLearningCourse: null,
+        qualificationType: 'all'
     });
 
     // Extract all webinar data regardless of date
@@ -85,6 +86,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }
                 }
                 
                 if (filters.country === 'international' && isUK) {
+                    return false;
+                }
+            }
+            
+            // Filter by qualification type
+            if (filters.qualificationType !== 'all') {
+                const courseLower = record.course.toLowerCase();
+                const isVQ = courseLower.includes('pop') || 
+                          courseLower.includes('btec') || 
+                          courseLower.includes('cohort') || 
+                          courseLower.includes('vq');
+                
+                if (filters.qualificationType === 'vq' && !isVQ) {
+                    return false;
+                }
+                
+                if (filters.qualificationType === 'gq' && isVQ) {
                     return false;
                 }
             }
