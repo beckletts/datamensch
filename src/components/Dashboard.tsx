@@ -1,0 +1,169 @@
+import React, { useState, useMemo } from 'react';
+import { Grid, Paper, Typography, Box, Divider } from '@mui/material';
+import { TrainingRecord } from '../types/TrainingData';
+import { Summary } from './Summary';
+import { CompletionRateChart } from './charts/CompletionRateChart';
+import { GeographicDistributionChart } from './charts/GeographicDistributionChart';
+import { EngagementMetricsChart } from './charts/EngagementMetricsChart';
+import { MonthlyBreakdown } from './MonthlyBreakdown';
+import { DashboardFilters, FilterOptions } from './DashboardFilters';
+// @ts-ignore - Fix TypeScript import issue
+import { CategoryDetail } from './CategoryDetail';
+import { getWebinarEnrollmentStats } from '../utils/dataProcessor';
+import { WebinarEnrollmentTable } from './WebinarEnrollmentTable';
+
+interface DashboardProps {
+    data: TrainingRecord[];
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
+    // Default filters
+    const [filters, setFilters] = useState<FilterOptions>({
+        timeFrame: {
+            startMonth: null,
+            endMonth: null
+        },
+        categories: []
+    });
+
+    // Extract all webinar data regardless of date
+    const allWebinarData = useMemo(() => {
+        return data.filter(record => record.course.toLowerCase().includes('webinar'));
+    }, [data]);
+
+    // Get statistics for all webinars regardless of filters
+    const webinarStats = useMemo(() => {
+        return getWebinarEnrollmentStats(allWebinarData);
+    }, [allWebinarData]);
+
+    // Filter the data based on selected filters
+    const filteredData = useMemo(() => {
+        return data.filter(record => {
+            // Filter by time frame - but skip this filter for webinar courses
+            if (filters.timeFrame.startMonth) {
+                const recordDate = new Date(record.enrollmentDate);
+                const monthYear = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (monthYear < filters.timeFrame.startMonth) {
+                    return false;
+                }
+                
+                if (filters.timeFrame.endMonth && monthYear > filters.timeFrame.endMonth) {
+                    return false;
+                }
+            }
+            
+            // Filter by category
+            if (filters.categories.length > 0) {
+                let recordCategory = 'Other';
+                if (record.course.toLowerCase().includes('webinar')) {
+                    recordCategory = 'Webinar';
+                } else if (record.course.toLowerCase().includes('recording')) {
+                    recordCategory = 'Recording';
+                } else {
+                    recordCategory = 'eLearning';
+                }
+                
+                if (!filters.categories.includes(recordCategory)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    }, [data, filters]);
+
+    // Handle filter changes
+    const handleFilterChange = (newFilters: FilterOptions) => {
+        setFilters(newFilters);
+    };
+
+    // Determine if we're showing a detailed category view
+    const showCategoryDetail = filters.categories.length === 1;
+    
+    // Determine if we're showing the webinar enrollment table
+    const showWebinarTable = filters.categories.length === 0 || 
+        (filters.categories.length === 1 && filters.categories[0] === 'Webinar');
+    
+    return (
+        <Box>
+            <Typography variant="h4" gutterBottom sx={{ mt: 4, mb: 4 }}>
+                Training Analytics Dashboard
+            </Typography>
+            
+            <DashboardFilters 
+                data={data} 
+                filters={filters} 
+                onFilterChange={handleFilterChange} 
+            />
+            
+            {filteredData.length > 0 ? (
+                <>
+                    <Summary 
+                        data={filteredData} 
+                        allWebinarData={allWebinarData}
+                    />
+                    
+                    {showWebinarTable && (
+                        <Box sx={{ mt: 4, mb: 4 }}>
+                            <Typography variant="h5" gutterBottom>
+                                Webinar Enrollment Counts
+                            </Typography>
+                            <Paper sx={{ p: 2 }}>
+                                <WebinarEnrollmentTable webinarStats={webinarStats} />
+                            </Paper>
+                        </Box>
+                    )}
+                    
+                    <Box sx={{ mt: 4 }}>
+                        <Typography variant="h5" gutterBottom>
+                            Key Metrics
+                        </Typography>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={4}>
+                                <Paper sx={{ p: 2 }}>
+                                    <CompletionRateChart data={filteredData} />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Paper sx={{ p: 2 }}>
+                                    <GeographicDistributionChart data={filteredData} />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Paper sx={{ p: 2 }}>
+                                    <EngagementMetricsChart data={filteredData} />
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                    
+                    {showCategoryDetail && (
+                        <>
+                            <Divider sx={{ my: 4 }} />
+                            <CategoryDetail 
+                                data={filteredData}
+                                allWebinarData={allWebinarData} 
+                                category={filters.categories[0]} 
+                            />
+                        </>
+                    )}
+                    
+                    <Divider sx={{ my: 4 }} />
+                    
+                    {/* Monthly breakdown will only render if there's multi-month data */}
+                    <MonthlyBreakdown data={filteredData} />
+                </>
+            ) : (
+                <Paper sx={{ p: 4, textAlign: 'center' }}>
+                    <Typography variant="h6" color="text.secondary">
+                        No data matches the selected filters
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Try adjusting your filters to see more results
+                    </Typography>
+                </Paper>
+            )}
+        </Box>
+    );
+};
