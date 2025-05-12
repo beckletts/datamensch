@@ -139,6 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }
                         <Summary 
                             data={filteredData} 
                             allWebinarData={allWebinarData}
+                            storylaneData={storylaneData}
                         />
                     </CollapsibleSection>
                     
@@ -205,10 +206,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }
                             />
                         </CollapsibleSection>
                     )}
-                    
-                    <CollapsibleSection title="Monthly Breakdown" defaultExpanded={false}>
-                        <MonthlyBreakdown data={filteredData} />
-                    </CollapsibleSection>
                 </>
             ) : (
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
