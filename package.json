@@ -12,14 +12,11 @@
     "serve": "node server.js"
   },
   "dependencies": {
-    "@emotion/cache": "11.11.0",
-    "@emotion/react": "11.11.0",
-    "@emotion/styled": "11.11.0",
-    "@mui/material": "5.15.0",
-    "@mui/icons-material": "5.15.0",
-    "@mui/system": "5.15.0",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.0",
+    "@mui/icons-material": "^5.14.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "@babel/plugin-transform-react-jsx": "^7.22.15",
     "chart.js": "^4.4.1",
     "clsx": "^2.1.1",
     "express": "^4.19.2",
@@ -29,10 +26,10 @@
     "react-dom": "^18.2.0",
     "recharts": "^2.15.3",
     "typescript": "^5.8.3",
-    "vite": "^5.4.19",
-    "vite-plugin-commonjs-externals": "^0.1.4"
+    "vite": "^5.4.19"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
     "@types/node": "^22.15.17",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^18.2.55",

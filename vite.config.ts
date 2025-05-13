@@ -1,24 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
-import commonjsExternals from 'vite-plugin-commonjs-externals'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react({
       jsxRuntime: 'automatic',
-      jsxImportSource: 'react'
-    }),
-    commonjsExternals({
-      externals: ['recharts', 'clsx', '@emotion/styled', '@mui/material']
+      jsxImportSource: '@emotion/react',
+      babel: {
+        plugins: ['@emotion/babel-plugin']
+      }
     })
   ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
       'react': resolve(__dirname, 'node_modules/react'),
-      'react-dom': resolve(__dirname, 'node_modules/react-dom')
+      'react-dom': resolve(__dirname, 'node_modules/react-dom'),
+      '@emotion/core': '@emotion/react',
+      '@emotion/styled': '@emotion/styled',
+      '@emotion/styled-base': '@emotion/styled',
+      'emotion-theming': '@emotion/react'
     },
     dedupe: ['react', 'react-dom']
   },
