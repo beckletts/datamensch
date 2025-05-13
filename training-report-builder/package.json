@@ -1,0 +1,39 @@
+{
+  "name": "training-report-builder",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "serve": "node server.js",
+    "build:with-types": "tsc -b && vite build"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.17.1",
+    "@mui/material": "^5.15.10",
+    "@types/node": "^22.15.17",
+    "@types/papaparse": "^5.3.16",
+    "@vitejs/plugin-react": "^4.2.1",
+    "chart.js": "^4.4.1",
+    "express": "^4.19.2",
+    "papaparse": "^5.4.1",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.15.3",
+    "typescript": "^5.8.3",
+    "vite": "^5.4.19"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5"
+  }
+}

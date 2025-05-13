@@ -1,0 +1,11 @@
+course,enrollmentDate,startedDate,completionDate,status,progressPercentage,timeSpentMinutes,quizScore,centreNumber,centreCountry
+Introduction to React Webinar,2023-01-15,2023-01-20,2023-02-10,Completed,100,240,92,C001,UK
+React Hooks Recording,2023-01-15,2023-01-25,2023-02-15,Completed,100,180,88,C002,UK
+JavaScript Fundamentals,2023-01-15,2023-01-18,,In Progress,60,120,,C003,UK
+TypeScript Essentials,2023-01-15,,,Not Started,0,0,,C004,UK
+Node.js Webinar,2023-01-15,2023-01-17,2023-01-25,Completed,100,210,85,C005,France
+Express.js Recording,2023-01-15,2023-01-22,,In Progress,45,90,,C006,Germany
+MongoDB Basics,2023-01-15,2023-01-19,2023-02-05,Completed,100,150,79,C007,UK
+GraphQL Introduction,2023-01-15,,,Not Started,0,0,,C008,Spain
+React Native Webinar,2023-01-15,2023-01-21,2023-02-15,Completed,100,280,94,C009,UK
+Redux Fundamentals,2023-01-15,2023-01-18,,In Progress,30,60,,C010,Italy 
