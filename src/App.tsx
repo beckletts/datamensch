@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Container, CssBaseline, ThemeProvider, StyledEngineProvider, createTheme, CircularProgress, Box, Typography } from '@mui/material'
+import { Container, CssBaseline, ThemeProvider, createTheme, CircularProgress, Box, Typography } from '@mui/material'
 import { FileUpload } from './components/FileUpload'
 import { Dashboard } from './components/Dashboard'
 import { TrainingRecord } from './types/TrainingData'
 import { loadLMSData, loadAllData } from './utils/dataLoader'
 
+// Create theme outside of component to prevent recreation
 const theme = createTheme({
     palette: {
         mode: 'light',
@@ -26,7 +27,11 @@ function App() {
 
     // Load data automatically when the app starts
     useEffect(() => {
+        let mounted = true;
+        
         const loadData = async () => {
+            if (!mounted) return;
+            
             try {
                 setLoading(true)
                 setError(null)
@@ -34,6 +39,7 @@ function App() {
                 // Try to load all data (both LMS and Storylane)
                 try {
                     const { lmsData, storylaneData } = await loadAllData()
+                    if (!mounted) return;
                     setTrainingData(lmsData)
                     setStoryLaneData(storylaneData)
                     console.log(`Successfully loaded ${lmsData.length} LMS records and ${storylaneData.length} Storylane records`)
@@ -42,19 +48,26 @@ function App() {
                     // Fallback to just loading LMS data
                     console.log('Falling back to loading only LMS data')
                     const lmsData = await loadLMSData()
+                    if (!mounted) return;
                     setTrainingData(lmsData)
                     console.log(`Successfully loaded ${lmsData.length} LMS records`)
                 }
 
+                if (!mounted) return;
                 setLoading(false)
             } catch (err) {
                 console.error('Error loading data:', err)
+                if (!mounted) return;
                 setError(`Failed to load data: ${err instanceof Error ? err.message : 'Unknown error'}`)
                 setLoading(false)
             }
         }
         
         loadData()
+        
+        return () => {
+            mounted = false;
+        }
     }, [])
     
     // Handle manual data uploads if needed
@@ -105,12 +118,10 @@ function App() {
     )
 
     return (
-        <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                {appContent}
-            </ThemeProvider>
-        </StyledEngineProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {appContent}
+        </ThemeProvider>
     )
 }
 
