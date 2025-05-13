@@ -11,7 +11,8 @@ import {
   SelectChangeEvent,
   Grid,
   OutlinedInput,
-  Stack
+  Stack,
+  TextField
 } from '@mui/material';
 import { TrainingRecord } from '../types/TrainingData';
 
@@ -24,6 +25,10 @@ export interface FilterOptions {
   country: 'all' | 'uk' | 'international';
   eLearningCourse: string | null;
   qualificationType: 'all' | 'vq' | 'gq';
+  centres: string[];
+  courses: string[];
+  startDate: string;
+  endDate: string;
 }
 
 interface DashboardFiltersProps {
@@ -99,6 +104,11 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     return Array.from(courses).sort();
   }, [data]);
 
+  // Get unique values for filters
+  const uniqueCategories = [...new Set(data.map(record => record.category))];
+  const uniqueCentres = [...new Set(data.map(record => record.centre))].filter(Boolean);
+  const uniqueCourses = [...new Set(data.map(record => record.course))];
+
   const handleTimeFrameChange = (event: SelectChangeEvent, type: 'startMonth' | 'endMonth') => {
     const value = event.target.value === 'all' ? null : event.target.value;
     onFilterChange({
@@ -111,10 +121,10 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
   };
 
   const handleCategoryChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
+    const value = event.target.value as string[];
     onFilterChange({
       ...filters,
-      categories: typeof value === 'string' ? value.split(',') : value
+      categories: value
     });
   };
 
@@ -137,6 +147,29 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     onFilterChange({
       ...filters,
       eLearningCourse: value
+    });
+  };
+
+  const handleCentreChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value as string[];
+    onFilterChange({
+      ...filters,
+      centres: value
+    });
+  };
+
+  const handleCourseChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value as string[];
+    onFilterChange({
+      ...filters,
+      courses: value
+    });
+  };
+
+  const handleDateRangeChange = (field: 'startDate' | 'endDate') => (event: React.ChangeEvent<HTMLInputElement>) => {
+    onFilterChange({
+      ...filters,
+      [field]: event.target.value
     });
   };
 
@@ -210,7 +243,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
                 </Stack>
               )}
             >
-              {availableCategories.map((category) => (
+              {uniqueCategories.map((category) => (
                 <MenuItem key={category} value={category}>
                   {category}
                 </MenuItem>
@@ -266,6 +299,78 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
               ))}
             </Select>
           </FormControl>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <FormControl fullWidth>
+            <InputLabel>Centres</InputLabel>
+            <Select
+              multiple
+              value={filters.centres}
+              onChange={handleCentreChange}
+              input={<OutlinedInput label="Centres" />}
+              renderValue={(selected) => (
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Stack>
+              )}
+            >
+              {uniqueCentres.map((centre) => (
+                <MenuItem key={centre} value={centre}>
+                  {centre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <FormControl fullWidth>
+            <InputLabel>Courses</InputLabel>
+            <Select
+              multiple
+              value={filters.courses}
+              onChange={handleCourseChange}
+              input={<OutlinedInput label="Courses" />}
+              renderValue={(selected) => (
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Stack>
+              )}
+            >
+              {uniqueCourses.map((course) => (
+                <MenuItem key={course} value={course}>
+                  {course}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <TextField
+            label="Start Date"
+            type="date"
+            value={filters.startDate}
+            onChange={handleDateRangeChange('startDate')}
+            InputLabelProps={{ shrink: true }}
+            sx={{ minWidth: 200 }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <TextField
+            label="End Date"
+            type="date"
+            value={filters.endDate}
+            onChange={handleDateRangeChange('endDate')}
+            InputLabelProps={{ shrink: true }}
+            sx={{ minWidth: 200 }}
+          />
         </Grid>
       </Grid>
       

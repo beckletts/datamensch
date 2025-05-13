@@ -14,6 +14,7 @@ import { WebinarEnrollmentTable } from './WebinarEnrollmentTable';
 import { CollapsibleSection } from './CollapsibleSection';
 import { StoryLaneRecord } from '../types/StoryLaneData';
 import { StoryLaneAnalytics } from './StoryLaneAnalytics';
+import { TrainingCoursesChart } from './TrainingCoursesChart';
 
 interface DashboardProps {
     data: TrainingRecord[];
@@ -141,7 +142,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }
                 onFilterChange={handleFilterChange}
                 data={data}
             />
-            <Summary data={filteredData} />
             <Grid container spacing={3} sx={{ mt: 1 }}>
                 <Grid item xs={12} md={6}>
                     <CompletionRateChart data={filteredData} />
@@ -156,6 +156,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <GeographicDistributionChart data={filteredData} />
+                </Grid>
+            </Grid>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                    <TrainingCoursesChart data={filteredData} />
                 </Grid>
             </Grid>
             <CollapsibleSection title="Webinar Enrollment Table" defaultExpanded>
