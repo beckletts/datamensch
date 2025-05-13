@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Container, CssBaseline, ThemeProvider, createTheme, CircularProgress, Box, Typography } from '@mui/material'
+import { Container, CssBaseline, ThemeProvider, StyledEngineProvider, createTheme, CircularProgress, Box, Typography } from '@mui/material'
 import { FileUpload } from './components/FileUpload'
 import { Dashboard } from './components/Dashboard'
 import { TrainingRecord } from './types/TrainingData'
@@ -9,6 +9,13 @@ const theme = createTheme({
     palette: {
         mode: 'light',
     },
+    components: {
+        MuiUseMediaQuery: {
+            defaultProps: {
+                noSsr: true
+            }
+        }
+    }
 })
 
 function App() {
@@ -55,63 +62,55 @@ function App() {
         setTrainingData(data)
     }
 
-    if (loading) {
-        return (
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <Container maxWidth="lg" sx={{ textAlign: 'center', py: 10 }}>
-                    <CircularProgress size={60} />
-                    <Typography variant="h6" sx={{ mt: 2 }}>
-                        Loading training data...
-                    </Typography>
-                </Container>
-            </ThemeProvider>
-        )
-    }
-
-    if (error) {
-        return (
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <Container maxWidth="lg" sx={{ textAlign: 'center', py: 10 }}>
-                    <Typography variant="h5" color="error" gutterBottom>
-                        Error Loading Data
-                    </Typography>
-                    <Typography variant="body1" paragraph>
-                        {error}
-                    </Typography>
-                    <Box sx={{ mt: 4 }}>
-                        <Typography variant="body2">
-                            You can still try to upload data manually:
+    const appContent = loading ? (
+        <Container maxWidth="lg" sx={{ textAlign: 'center', py: 10 }}>
+            <CircularProgress size={60} />
+            <Typography variant="h6" sx={{ mt: 2 }}>
+                Loading training data...
+            </Typography>
+        </Container>
+    ) : error ? (
+        <Container maxWidth="lg" sx={{ textAlign: 'center', py: 10 }}>
+            <Typography variant="h5" color="error" gutterBottom>
+                Error Loading Data
+            </Typography>
+            <Typography variant="body1" paragraph>
+                {error}
+            </Typography>
+            <Box sx={{ mt: 4 }}>
+                <Typography variant="body2">
+                    You can still try to upload data manually:
+                </Typography>
+                <FileUpload onDataLoaded={handleTrainingDataLoaded} />
+            </Box>
+        </Container>
+    ) : (
+        <Container maxWidth="lg">
+            {trainingData.length === 0 ? (
+                <FileUpload onDataLoaded={handleTrainingDataLoaded} />
+            ) : (
+                <>
+                    <Dashboard data={trainingData} storylaneData={storylaneData} />
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="body2" color="text.secondary" align="center">
+                            Data is loaded automatically. To load different data, use the upload button below:
                         </Typography>
-                        <FileUpload onDataLoaded={handleTrainingDataLoaded} />
+                        <Box sx={{ mt: 2, textAlign: 'center' }}>
+                            <FileUpload onDataLoaded={handleTrainingDataLoaded} />
+                        </Box>
                     </Box>
-                </Container>
-            </ThemeProvider>
-        )
-    }
+                </>
+            )}
+        </Container>
+    )
 
     return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Container maxWidth="lg">
-                {trainingData.length === 0 ? (
-                    <FileUpload onDataLoaded={handleTrainingDataLoaded} />
-                ) : (
-                    <>
-                        <Dashboard data={trainingData} storylaneData={storylaneData} />
-                        <Box sx={{ mt: 3 }}>
-                            <Typography variant="body2" color="text.secondary" align="center">
-                                Data is loaded automatically. To load different data, use the upload button below:
-                            </Typography>
-                            <Box sx={{ mt: 2, textAlign: 'center' }}>
-                                <FileUpload onDataLoaded={handleTrainingDataLoaded} />
-                            </Box>
-                        </Box>
-                    </>
-                )}
-            </Container>
-        </ThemeProvider>
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                {appContent}
+            </ThemeProvider>
+        </StyledEngineProvider>
     )
 }
 
