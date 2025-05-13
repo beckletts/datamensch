@@ -26,7 +26,8 @@
     "react-dom": "^18.2.0",
     "recharts": "^2.15.3",
     "typescript": "^5.8.3",
-    "vite": "^5.4.19"
+    "vite": "^5.4.19",
+    "vite-plugin-commonjs-externals": "^0.1.4"
   },
   "devDependencies": {
     "@types/node": "^22.15.17",
@@ -35,8 +36,7 @@
     "@types/react-dom": "^18.2.19",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "vite-plugin-commonjs-externals": "^0.1.4"
+    "eslint-plugin-react-refresh": "^0.4.5"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.9.5"
