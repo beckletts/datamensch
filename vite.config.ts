@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     commonjsExternals({
-      externals: ['recharts', 'clsx']
+      externals: ['recharts', 'clsx', '@emotion/styled', '@mui/material']
     })
   ],
   resolve: {
@@ -17,10 +17,13 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['recharts', 'clsx']
+    include: ['recharts', 'clsx', '@emotion/styled', '@mui/material'],
+    esbuildOptions: {
+      target: 'es2020'
+    }
   },
   ssr: {
-    noExternal: ['recharts', 'clsx']
+    noExternal: ['recharts', 'clsx', '@emotion/styled', '@mui/material']
   },
   build: {
     outDir: 'dist',
@@ -33,7 +36,7 @@ export default defineConfig({
             if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor';
             }
-            if (id.includes('recharts')) {
+            if (id.includes('recharts') || id.includes('@emotion') || id.includes('@mui')) {
               return 'charts';
             }
           }
@@ -42,7 +45,13 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
     commonjsOptions: {
-      include: [/node_modules/]
+      include: [
+        /node_modules/,
+        /\.js$/,
+        /@emotion\/styled/,
+        /@mui\/material/
+      ],
+      transformMixedEsModules: true
     }
   }
 })
