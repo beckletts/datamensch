@@ -7,6 +7,8 @@ export interface StoryLaneRecord {
     percentComplete: number;
     openedCTA: string;
     country: string;
+    ctaClicked: boolean;
+    centreNumber: string;
 }
 
 export interface StoryLaneStats {

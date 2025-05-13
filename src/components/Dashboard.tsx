@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Grid, Paper, Typography, Box } from '@mui/material';
 import { TrainingRecord } from '../types/TrainingData';
-import { StoryLaneRecord } from '../types/StoryLaneData';
 import { Summary } from './Summary';
 import { CompletionRateChart } from './charts/CompletionRateChart';
 import { GeographicDistributionChart } from './charts/GeographicDistributionChart';
@@ -13,26 +12,12 @@ import { CategoryDetail } from './CategoryDetail';
 import { getWebinarEnrollmentStats } from '../utils/dataProcessor';
 import { WebinarEnrollmentTable } from './WebinarEnrollmentTable';
 import { CollapsibleSection } from './CollapsibleSection';
-import { StoryLaneFileUpload } from './StoryLaneFileUpload';
-import { StoryLaneAnalytics } from './StoryLaneAnalytics';
 
 interface DashboardProps {
     data: TrainingRecord[];
 }
 
-// Define StoryLaneRecord interface directly here for simplicity
-interface StoryLaneRecord {
-    demo: string;
-    link: string;
-    lastView: string;
-    totalTime: string;
-    stepsCompleted: number;
-    percentComplete: number;
-    openedCTA: string;
-    country: string;
-}
-
-export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
+export const Dashboard = ({ data }: DashboardProps) => {
     // Default filters
     const [filters, setFilters] = useState<FilterOptions>({
         timeFrame: {
@@ -44,9 +29,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         eLearningCourse: null
     });
 
-    // StoryLane data state
-    const [storyLaneData, setStoryLaneData] = useState<StoryLaneRecord[] | null>(null);
-
     // Extract all webinar data regardless of date
     const allWebinarData = useMemo(() => {
         return data.filter(record => record.course.toLowerCase().includes('webinar'));
@@ -57,49 +39,51 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         return getWebinarEnrollmentStats(allWebinarData);
     }, [allWebinarData]);
 
-    // Filter the data based on selected filters
+    // Apply filters to data
     const filteredData = useMemo(() => {
         return data.filter(record => {
             // Filter by time frame
-            if (filters.timeFrame.startMonth) {
-                const recordDate = new Date(record.enrollmentDate);
-                const monthYear = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+            if (filters.timeFrame.startMonth && filters.timeFrame.endMonth) {
+                const enrollmentDate = new Date(record.enrollmentDate);
+                const startDate = new Date(filters.timeFrame.startMonth);
+                const endDate = new Date(filters.timeFrame.endMonth);
                 
-                if (monthYear < filters.timeFrame.startMonth) {
-                    return false;
-                }
+                // Set end date to the end of the month
+                endDate.setMonth(endDate.getMonth() + 1);
+                endDate.setDate(0);
                 
-                if (filters.timeFrame.endMonth && monthYear > filters.timeFrame.endMonth) {
+                if (enrollmentDate < startDate || enrollmentDate > endDate) {
                     return false;
                 }
             }
             
             // Filter by category
             if (filters.categories.length > 0) {
-                let recordCategory = 'Other';
-                if (record.course.toLowerCase().includes('webinar')) {
-                    recordCategory = 'Webinar';
-                } else if (record.course.toLowerCase().includes('recording')) {
-                    recordCategory = 'Recording';
-                } else {
-                    recordCategory = 'eLearning';
+                const course = record.course.toLowerCase();
+                
+                if (filters.categories.includes('Webinar') && 
+                    course.includes('webinar')) {
+                    return true;
                 }
                 
-                if (!filters.categories.includes(recordCategory)) {
-                    return false;
+                if (filters.categories.includes('Recording') && 
+                    course.includes('recording')) {
+                    return true;
                 }
+                
+                if (filters.categories.includes('eLearning') && 
+                    !course.includes('webinar') && 
+                    !course.includes('recording')) {
+                    return true;
+                }
+                
+                // If we get here, the course doesn't match any of the selected categories
+                return false;
             }
             
             // Filter by country
             if (filters.country !== 'all') {
-                const isUK = record.centreCountry.toLowerCase() === 'uk' || 
-                            record.centreCountry.toLowerCase() === 'united kingdom';
-                
-                if (filters.country === 'uk' && !isUK) {
-                    return false;
-                }
-                
-                if (filters.country === 'international' && isUK) {
+                if (record.centreCountry !== filters.country) {
                     return false;
                 }
             }
@@ -124,46 +108,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         setFilters(newFilters);
     };
 
-    // Handle StoryLane data upload
-    const handleStoryLaneDataLoad = (data: StoryLaneRecord[]) => {
-        setStoryLaneData(data);
-    };
-
     // Determine if we're showing a detailed category view
     const showCategoryDetail = filters.categories.length === 1;
     
-    // Determine if we're showing the webinar enrollment table
-    const showWebinarTable = filters.categories.length === 0 || 
-        (filters.categories.length === 1 && filters.categories[0] === 'Webinar');
-    
     return (
-        <Box>
-            <Typography variant="h4" gutterBottom sx={{ mt: 4, mb: 4 }}>
-                Training Analytics Dashboard
+        <Box sx={{ p: 3 }}>
+            <Typography variant="h4" gutterBottom>
+                Training Report Dashboard
             </Typography>
             
-            <CollapsibleSection title="Filters" defaultExpanded={true}>
-                <DashboardFilters 
-                    data={data} 
-                    filters={filters} 
-                    onFilterChange={handleFilterChange} 
+            <DashboardFilters 
+                filters={filters} 
+                onFilterChange={handleFilterChange}
+                data={data}
+            />
+            
+            <CollapsibleSection title="Webinar Statistics" defaultExpanded={true}>
+                <WebinarEnrollmentTable 
+                    webinarStats={webinarStats}
                 />
             </CollapsibleSection>
             
             {filteredData.length > 0 ? (
                 <>
-                    <CollapsibleSection title="Key Statistics" defaultExpanded={true}>
-                        <Summary 
-                            data={filteredData} 
-                            allWebinarData={allWebinarData}
-                        />
-                    </CollapsibleSection>
-                    
-                    {showWebinarTable && (
-                        <CollapsibleSection title="Webinar Enrollment Counts" defaultExpanded={true}>
-                            <WebinarEnrollmentTable webinarStats={webinarStats} />
-                        </CollapsibleSection>
-                    )}
+                    <Summary 
+                        data={filteredData} 
+                        allWebinarData={allWebinarData}
+                    />
                     
                     <CollapsibleSection title="Key Metrics" defaultExpanded={true}>
                         <Grid container spacing={3}>
@@ -197,15 +168,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                     
                     <CollapsibleSection title="Monthly Breakdown" defaultExpanded={false}>
                         <MonthlyBreakdown data={filteredData} />
-                    </CollapsibleSection>
-                    
-                    {/* StoryLane Section */}
-                    <CollapsibleSection title="StoryLane Interactive Demos Analytics" defaultExpanded={true}>
-                        {!storyLaneData ? (
-                            <StoryLaneFileUpload onDataLoaded={handleStoryLaneDataLoad} />
-                        ) : (
-                            <StoryLaneAnalytics data={storyLaneData} />
-                        )}
                     </CollapsibleSection>
                 </>
             ) : (
