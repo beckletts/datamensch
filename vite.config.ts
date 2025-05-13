@@ -10,6 +10,9 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  optimizeDeps: {
+    include: ['recharts', 'clsx']
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
