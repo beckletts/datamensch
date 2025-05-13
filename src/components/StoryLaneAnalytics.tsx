@@ -261,11 +261,7 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
         });
         
         const countryData = Object.entries(countryCount)
-            .map(([country, count]) => ({ 
-                country, 
-                count,
-                percentage: Math.round((count / filteredData.length) * 100)
-            }))
+            .map(([country, count]) => ({ country, count }))
             .sort((a, b) => b.count - a.count);
         
         // CTA click stats (use ctaClicked property)
@@ -650,7 +646,7 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
                                         </TableCell>
                                         <TableCell align="right">{country.count}</TableCell>
                                         <TableCell align="right">
-                                            {country.percentage}%
+                                            {Math.round((country.count / stats.totalViews) * 100)}%
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -670,4 +666,4 @@ export const StoryLaneAnalytics: React.FC<StoryLaneAnalyticsProps> = ({ data }) 
             )}
         </div>
     );
-}; 
+};

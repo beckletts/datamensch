@@ -12,12 +12,15 @@ import { CategoryDetail } from './CategoryDetail';
 import { getWebinarEnrollmentStats } from '../utils/dataProcessor';
 import { WebinarEnrollmentTable } from './WebinarEnrollmentTable';
 import { CollapsibleSection } from './CollapsibleSection';
+import { StoryLaneRecord } from '../types/StoryLaneData';
+import { StoryLaneAnalytics } from './StoryLaneAnalytics';
 
 interface DashboardProps {
     data: TrainingRecord[];
+    storylaneData?: StoryLaneRecord[];
 }
 
-export const Dashboard = ({ data }: DashboardProps) => {
+export const Dashboard: React.FC<DashboardProps> = ({ data, storylaneData = [] }) => {
     // Default filters
     const [filters, setFilters] = useState<FilterOptions>({
         timeFrame: {
@@ -26,7 +29,8 @@ export const Dashboard = ({ data }: DashboardProps) => {
         },
         categories: [],
         country: 'all',
-        eLearningCourse: null
+        eLearningCourse: null,
+        qualificationType: 'all'
     });
 
     // Extract all webinar data regardless of date
@@ -39,51 +43,66 @@ export const Dashboard = ({ data }: DashboardProps) => {
         return getWebinarEnrollmentStats(allWebinarData);
     }, [allWebinarData]);
 
-    // Apply filters to data
+    // Filter the data based on selected filters
     const filteredData = useMemo(() => {
         return data.filter(record => {
             // Filter by time frame
-            if (filters.timeFrame.startMonth && filters.timeFrame.endMonth) {
-                const enrollmentDate = new Date(record.enrollmentDate);
-                const startDate = new Date(filters.timeFrame.startMonth);
-                const endDate = new Date(filters.timeFrame.endMonth);
+            if (filters.timeFrame.startMonth) {
+                const recordDate = new Date(record.enrollmentDate);
+                const monthYear = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
                 
-                // Set end date to the end of the month
-                endDate.setMonth(endDate.getMonth() + 1);
-                endDate.setDate(0);
+                if (monthYear < filters.timeFrame.startMonth) {
+                    return false;
+                }
                 
-                if (enrollmentDate < startDate || enrollmentDate > endDate) {
+                if (filters.timeFrame.endMonth && monthYear > filters.timeFrame.endMonth) {
                     return false;
                 }
             }
             
             // Filter by category
             if (filters.categories.length > 0) {
-                const course = record.course.toLowerCase();
-                
-                if (filters.categories.includes('Webinar') && 
-                    course.includes('webinar')) {
-                    return true;
+                let recordCategory = 'Other';
+                if (record.course.toLowerCase().includes('webinar')) {
+                    recordCategory = 'Webinar';
+                } else if (record.course.toLowerCase().includes('recording')) {
+                    recordCategory = 'Recording';
+                } else {
+                    recordCategory = 'eLearning';
                 }
                 
-                if (filters.categories.includes('Recording') && 
-                    course.includes('recording')) {
-                    return true;
+                if (!filters.categories.includes(recordCategory)) {
+                    return false;
                 }
-                
-                if (filters.categories.includes('eLearning') && 
-                    !course.includes('webinar') && 
-                    !course.includes('recording')) {
-                    return true;
-                }
-                
-                // If we get here, the course doesn't match any of the selected categories
-                return false;
             }
             
             // Filter by country
             if (filters.country !== 'all') {
-                if (record.centreCountry !== filters.country) {
+                const isUK = record.centreCountry.toLowerCase() === 'uk' || 
+                            record.centreCountry.toLowerCase() === 'united kingdom';
+                
+                if (filters.country === 'uk' && !isUK) {
+                    return false;
+                }
+                
+                if (filters.country === 'international' && isUK) {
+                    return false;
+                }
+            }
+            
+            // Filter by qualification type
+            if (filters.qualificationType !== 'all') {
+                const courseLower = record.course.toLowerCase();
+                const isVQ = courseLower.includes('pop') || 
+                          courseLower.includes('btec') || 
+                          courseLower.includes('cohort') || 
+                          courseLower.includes('vq');
+                
+                if (filters.qualificationType === 'vq' && !isVQ) {
+                    return false;
+                }
+                
+                if (filters.qualificationType === 'gq' && isVQ) {
                     return false;
                 }
             }
@@ -122,64 +141,38 @@ export const Dashboard = ({ data }: DashboardProps) => {
                 onFilterChange={handleFilterChange}
                 data={data}
             />
-            
-            <CollapsibleSection title="Webinar Statistics" defaultExpanded={true}>
-                <WebinarEnrollmentTable 
-                    webinarStats={webinarStats}
-                />
+            <Summary data={filteredData} />
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12} md={6}>
+                    <CompletionRateChart data={filteredData} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <EngagementMetricsChart data={filteredData} />
+                </Grid>
+            </Grid>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12} md={6}>
+                    <MonthlyBreakdown data={filteredData} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <GeographicDistributionChart data={filteredData} />
+                </Grid>
+            </Grid>
+            <CollapsibleSection title="Webinar Enrollment Table" defaultExpanded>
+                <WebinarEnrollmentTable data={filteredData} webinarStats={webinarStats} />
             </CollapsibleSection>
-            
-            {filteredData.length > 0 ? (
-                <>
-                    <Summary 
-                        data={filteredData} 
-                        allWebinarData={allWebinarData}
-                    />
-                    
-                    <CollapsibleSection title="Key Metrics" defaultExpanded={true}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={4}>
-                                <Paper sx={{ p: 2 }}>
-                                    <CompletionRateChart data={filteredData} />
-                                </Paper>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Paper sx={{ p: 2 }}>
-                                    <GeographicDistributionChart data={filteredData} />
-                                </Paper>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Paper sx={{ p: 2 }}>
-                                    <EngagementMetricsChart data={filteredData} />
-                                </Paper>
-                            </Grid>
-                        </Grid>
-                    </CollapsibleSection>
-                    
-                    {showCategoryDetail && (
-                        <CollapsibleSection title={`${filters.categories[0]} Details`} defaultExpanded={true}>
-                            <CategoryDetail 
-                                data={filteredData}
-                                allWebinarData={allWebinarData} 
-                                category={filters.categories[0]} 
-                            />
-                        </CollapsibleSection>
-                    )}
-                    
-                    <CollapsibleSection title="Monthly Breakdown" defaultExpanded={false}>
-                        <MonthlyBreakdown data={filteredData} />
-                    </CollapsibleSection>
-                </>
-            ) : (
-                <Paper sx={{ p: 4, textAlign: 'center' }}>
-                    <Typography variant="h6" color="text.secondary">
-                        No data matches the selected filters
+            {showCategoryDetail && (
+                <CategoryDetail data={filteredData} category={filters.categories[0]} />
+            )}
+            {/* StoryLane Analytics Section */}
+            {storylaneData && storylaneData.length > 0 && (
+                <Box sx={{ mt: 4 }}>
+                    <Typography variant="h5" gutterBottom>
+                        StoryLane Analytics
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Try adjusting your filters to see more results
-                    </Typography>
-                </Paper>
+                    <StoryLaneAnalytics data={storylaneData} />
+                </Box>
             )}
         </Box>
     );
-}; 
+}

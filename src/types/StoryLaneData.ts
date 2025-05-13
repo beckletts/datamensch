@@ -1,14 +1,14 @@
 export interface StoryLaneRecord {
-    demo: string;
-    link: string;
-    lastView: string;
-    totalTime: string;
-    stepsCompleted: number;
-    percentComplete: number;
-    openedCTA: string;
-    country: string;
-    ctaClicked: boolean;
-    centreNumber: string;
+  demo: string;
+  link: string;
+  lastView: string;
+  totalTime: string;
+  stepsCompleted: number;
+  percentComplete: number;
+  openedCTA: string;
+  ctaClicked: boolean;
+  country: string;
+  centreNumber: string;
 }
 
 export interface StoryLaneStats {
@@ -22,4 +22,4 @@ export interface StoryLaneStats {
 export interface StoryLaneFilterOptions {
     month: string | null;
     demoType: string | null;
-} 
+}

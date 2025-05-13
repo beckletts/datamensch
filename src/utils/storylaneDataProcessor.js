@@ -22,6 +22,10 @@ export const parseStoryLaneCSV = (csv) => {
             // Combine country parts (for "United Kingdom", "United Arab Emirates", etc.)
             const country = parts.slice(7).join(",");
             
+            // Determine if CTA was clicked (true if contains a URL)
+            const openedCTA = parts[6].trim();
+            const ctaClicked = openedCTA !== '-' && openedCTA.includes('http');
+            
             // Create record object
             const record = {
                 demo: parts[0],
@@ -30,8 +34,8 @@ export const parseStoryLaneCSV = (csv) => {
                 totalTime: parts[3],
                 stepsCompleted: parseInt(parts[4], 10) || 0,
                 percentComplete: parseFloat(parts[5]) || 0,
-                openedCTA: parts[6],
-                ctaClicked: parts[6] !== '-' && parts[6] !== '', // Convert openedCTA to boolean
+                openedCTA: openedCTA,
+                ctaClicked: ctaClicked,
                 country: country,
                 centreNumber: parts[9] || '' // Add centreNumber (using the 10th column if available)
             };
@@ -48,10 +52,14 @@ export const parseStoryLaneCSV = (csv) => {
 // Load Storylane data from the public folder
 export const loadStoryLaneData = async () => {
     try {
-        console.log("Loading Storylane data from public folder...");
+        console.log("Looking for Storylane data in public folder...");
         const response = await fetch('/Storylane all.csv');
         
         if (!response.ok) {
+            if (response.status === 404) {
+                console.warn("Storylane data file 'Storylane all.csv' was not found in the public folder. To use Storylane analytics, please add this file.");
+                return [];
+            }
             throw new Error(`Failed to load Storylane data: ${response.status} ${response.statusText}`);
         }
         
