@@ -6,18 +6,32 @@ import commonjsExternals from 'vite-plugin-commonjs-externals'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react',
+      babel: {
+        plugins: [
+          ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]
+        ]
+      }
+    }),
     commonjsExternals({
       externals: ['recharts', 'clsx', '@emotion/styled', '@mui/material']
     })
   ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
-    }
+      '@': resolve(__dirname, 'src'),
+      'react': resolve(__dirname, 'node_modules/react'),
+      'react-dom': resolve(__dirname, 'node_modules/react-dom')
+    },
+    dedupe: ['react', 'react-dom']
+  },
+  define: {
+    'process.env': {}
   },
   optimizeDeps: {
-    include: ['recharts', 'clsx', '@emotion/styled', '@mui/material'],
+    include: ['react', 'react-dom', 'recharts', 'clsx', '@emotion/styled', '@mui/material'],
     esbuildOptions: {
       target: 'es2020'
     }
