@@ -13,6 +13,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ['recharts', 'clsx']
   },
+  ssr: {
+    noExternal: ['recharts', 'clsx']
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -31,6 +34,9 @@ export default defineConfig({
         }
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    commonjsOptions: {
+      include: [/node_modules/]
+    }
   }
 })
