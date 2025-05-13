@@ -12,6 +12,7 @@
     "serve": "node server.js"
   },
   "dependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.22.15",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.10",
